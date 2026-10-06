@@ -17,11 +17,12 @@ public class CustomerOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Dish dishId;
+
     private int quantity;
     private Double totalPrice;
     private String status;
     private LocalDateTime createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Dish dishId;
 }

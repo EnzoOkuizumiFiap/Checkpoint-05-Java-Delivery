@@ -1,20 +1,18 @@
 package br.com.fiap.orderservice.Dish;
 
-import org.springframework.web.bind.annotation.RequestMapping;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RestController("/")
+@RestController
+@RequiredArgsConstructor
 public class DishController {
-    private DishRepository repository;
+    private final DishRepository repository;
 
-    // All Dishes
-    @RequestMapping("dishes")
+    @GetMapping("/dishes")
     public List<Dish> getAllDishes() {
         return repository.findAll();
     }
-
-    //
-
 }

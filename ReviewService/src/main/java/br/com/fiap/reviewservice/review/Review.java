@@ -1,6 +1,5 @@
 package br.com.fiap.reviewservice.review;
 
-import br.com.fiap.orderservice.Dish.Dish;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

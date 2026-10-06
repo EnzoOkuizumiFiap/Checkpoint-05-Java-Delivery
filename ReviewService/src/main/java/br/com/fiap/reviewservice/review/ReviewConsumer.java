@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class ReviewConsumer {
 
-    private final ConcurrentHashMap<String, Integer> reviews = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ReviewAccumulator> reviews = new ConcurrentHashMap<>();
     private final ReviewRepository reviewRepository;
 
     public ReviewConsumer(ReviewRepository reviewRepository) {
@@ -20,24 +20,39 @@ public class ReviewConsumer {
     }
 
     @RabbitListener(queues = RabbitConfig.QUEUE_NAME)
-    public void consumeReview(String dishId) {
-        reviews.merge(dishId, 1, Integer::sum);
-        log.info("Review sent to dish: {}, total: {}", dishId, reviews.get(dishId));
+    public void consumeReview(ReviewInfo info) {
+        reviews.compute(info.dishId(), (key, accumulator) -> {
+            if (accumulator == null) {
+                return new ReviewAccumulator(info.dishName(), 1, info.rating());
+            }
+            accumulator.setCount(accumulator.getCount() + 1);
+            accumulator.setSumRating(accumulator.getSumRating() + info.rating());
+            return accumulator;
+        });
+        log.info("Review received for dish: {}, rating: {}", info.dishId(), info.rating());
     }
 
-    @Scheduled(fixedDelay = 3_000)
+    @Scheduled(fixedDelay = 5_000)
     public void flush(){
+        if (reviews.isEmpty()) return;
+
         log.info("Reviews flush");
         reviews.forEach(this::persist);
         reviews.clear();
     }
 
-    private void persist(String dishId, Integer totalReviews){
+    private void persist(String dishId, ReviewAccumulator accumulator){
         var review = reviewRepository.findById(dishId).orElseGet(
-                () -> new Review(dishId, 0)
+                () -> new Review(dishId, accumulator.getDishName(), 0.0, 0)
         );
 
-        review.setTotalReviews(review.getTotalReviews() + totalReviews);
+        review.setDishName(accumulator.getDishName());
+        int newTotalCount = review.getCount() + accumulator.getCount();
+        double totalRatingSum = (review.getAverage() * review.getCount()) + accumulator.getSumRating();
+        double newAverage = newTotalCount > 0 ? totalRatingSum / newTotalCount : 0.0;
+
+        review.setCount(newTotalCount);
+        review.setAverage(Math.round(newAverage * 10.0) / 10.0);
 
         reviewRepository.save(review);
     }

@@ -22,5 +22,6 @@ public class CustomerOrder {
     private String status;
     private LocalDateTime createdAt;
 
-    //private Dish dishId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Dish dishId;
 }

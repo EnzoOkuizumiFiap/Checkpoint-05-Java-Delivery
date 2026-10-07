@@ -1,42 +1,41 @@
 package br.com.fiap.orderservice.CustomerOrder;
 
+import br.com.fiap.orderservice.CustomerOrder.dto.PaymentRequest;
+import br.com.fiap.orderservice.CustomerOrder.dto.PaymentResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.server.ResponseStatusException;
+
+import java.math.BigDecimal;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class PaymentClient {
+
     private final RestTemplate restTemplate;
-    public record PaymentResponse(String status, String instance) {}
 
     @Retryable(
-            includes = {ResponseStatusException.class},
+            includes = {RestClientException.class},
             maxRetries = 3,
             delay = 500,
             jitter = 200,
             multiplier = 2,
             maxDelay = 5_000
     )
-    public PaymentResponse tryPayment() {
+    public PaymentResponse tryPayment(BigDecimal amount) {
+        log.info("Tentando processar pagamento no payment-service: R$ {}", amount);
 
         PaymentResponse response = restTemplate.postForObject(
                 "http://PAYMENT-SERVICE/payments",
-                null,
+                new PaymentRequest(amount),
                 PaymentResponse.class
         );
 
-        if (response == null ) {
-            log.info("\uD83D\uDD34 Payment service did not respond.\"");
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Payment service did not respond");
-        }
-
+        log.info("Pagamento aprovado na instância {}: {}", response != null ? response.instance() : "N/A", response);
         return response;
     }
 }

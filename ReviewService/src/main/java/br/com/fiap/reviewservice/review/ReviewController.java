@@ -1,6 +1,6 @@
 package br.com.fiap.reviewservice.review;
 
-import br.com.fiap.reviewservice.config.RabbitConfig;
+import br.com.fiap.orderservice.config.RabbitConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.HttpStatus;

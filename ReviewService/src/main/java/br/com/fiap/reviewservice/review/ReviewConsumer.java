@@ -1,6 +1,6 @@
 package br.com.fiap.reviewservice.review;
 
-import br.com.fiap.reviewservice.config.RabbitConfig;
+import br.com.fiap.orderservice.config.RabbitConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.scheduling.annotation.Scheduled;

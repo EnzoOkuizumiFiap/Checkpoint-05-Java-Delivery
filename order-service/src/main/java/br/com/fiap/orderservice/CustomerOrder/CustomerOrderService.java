@@ -48,7 +48,7 @@ public class CustomerOrderService {
         } catch (Exception ex) {
             log.error("Todas as tentativas de pagamento falharam: {}", ex.getMessage());
             // Ao lançar a exceção, o @Transactional dá rollback automático (estoque permanece intacto)
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Payment failed: " + ex.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Payment failed");
         }
 
         log.info("Pagamento aprovado com sucesso pela instância: {}", paymentResponse.instance());

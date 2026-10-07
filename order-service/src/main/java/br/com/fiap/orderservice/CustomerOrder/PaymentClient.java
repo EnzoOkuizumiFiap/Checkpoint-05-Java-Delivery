@@ -35,7 +35,11 @@ public class PaymentClient {
                 PaymentResponse.class
         );
 
-        log.info("Pagamento aprovado na instância {}: {}", response != null ? response.instance() : "N/A", response);
+        if (response == null) {
+            throw new RestClientException("Empty payment response received from payment-service");
+        }
+
+        log.info("Pagamento aprovado na instância {}: {}", response.instance(), response);
         return response;
     }
 }

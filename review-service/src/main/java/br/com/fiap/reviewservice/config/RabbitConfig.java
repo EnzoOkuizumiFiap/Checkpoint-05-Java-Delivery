@@ -1,16 +1,12 @@
 package br.com.fiap.reviewservice.config;
 
-import br.com.fiap.reviewservice.review.ReviewInfo;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
-import org.springframework.amqp.support.converter.DefaultClassMapper;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.Map;
 
 @Configuration
 public class RabbitConfig {
@@ -40,14 +36,7 @@ public class RabbitConfig {
     @Bean
     public JacksonJsonMessageConverter jsonMessageConverter() {
         JacksonJsonMessageConverter converter = new JacksonJsonMessageConverter();
-
-        DefaultClassMapper classMapper = new DefaultClassMapper();
-        classMapper.setIdClassMapping(Map.of(
-                "br.com.fiap.orderservice.Review.ReviewPublisher$ReviewMessage",
-                ReviewInfo.class
-        ));
-
-        converter.setClassMapper(classMapper);
+        converter.setAlwaysConvertToInferredType(true);
         return converter;
     }
 }

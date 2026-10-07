@@ -23,6 +23,11 @@ public class ReviewConsumer {
 
     @RabbitListener(queues = RabbitConfig.QUEUE_NAME)
     public synchronized void consumeReview(ReviewInfo info) {
+        if (info == null || info.dishId() == null || info.rating() == null) {
+            log.warn("Invalid review message ignored: {}", info);
+            return;
+        }
+
         reviews.compute(info.dishId(), (key, accumulator) -> {
             if (accumulator == null) {
                 return new ReviewAccumulator(info.dishName(), 1, info.rating());

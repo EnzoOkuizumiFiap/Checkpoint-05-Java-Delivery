@@ -1,26 +1,29 @@
 package br.com.fiap.orderservice.CustomerOrder;
 
+import br.com.fiap.orderservice.CustomerOrder.dto.CustomerOrderRequest;
+import br.com.fiap.orderservice.CustomerOrder.dto.CustomerOrderResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-@Slf4j
 @RestController
+@RequestMapping("/orders")
 @RequiredArgsConstructor
 public class CustomerOrderController {
+
     private final CustomerOrderService service;
 
-    public record PurchaseResponse(String status) {}
+    @PostMapping
+    public ResponseEntity<CustomerOrderResponse> createOrder(@Valid @RequestBody CustomerOrderRequest request) {
+        CustomerOrder order = service.createOrder(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(CustomerOrderResponse.from(order));
+    }
 
-    @PostMapping("orders")
-    public ResponseEntity<PurchaseResponse> purchase(Long id, int quantity){
-        try {
-            service.purchase(id, quantity);
-            return ResponseEntity.ok(new PurchaseResponse("Dish purchased successfully for id: " + id));
-        } catch (Exception ex) {
-            return ResponseEntity.badRequest().body(new PurchaseResponse("ERROR: " + ex.getMessage()));
-        }
+    @GetMapping("/{id}")
+    public ResponseEntity<CustomerOrderResponse> getOrderById(@PathVariable Long id) {
+        CustomerOrder order = service.getOrderById(id);
+        return ResponseEntity.ok(CustomerOrderResponse.from(order));
     }
 }

@@ -17,10 +17,7 @@ public class CustomerOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Dish dishId;
-
+    private Long dishId;
     private int quantity;
     private BigDecimal totalPrice;
     private String status;
